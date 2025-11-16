@@ -1,14 +1,19 @@
 {
   "name": "fx-telegram-copier",
-  "version": "1.0.0",
-  "description": "Telegram bot for copying trading signals to MT4/MT5 accounts",
+  "version": "1.1.0",
+  "description": "Advanced Telegram bot for copying trading signals to MT4/MT5 accounts via MetaAPI Cloud",
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js",
     "dev": "nodemon bot.js",
+    "setup": "cp .env.example .env && echo '✅ .env file created! Please edit it with your actual values.'",
     "test": "echo \"No tests configured for trading bot\" && exit 0",
     "build": "echo \"No build step required\"",
-    "validate": "node -c bot.js && echo '✅ Bot.js syntax is valid'"
+    "validate": "node -c bot.js && echo '✅ Bot.js syntax is valid'",
+    "test:connections": "node -e \"console.log('🔧 Testing API connections...'); require('./bot.js').testConnections?.() || console.log('⚠️ Test function not available')\"",
+    "clean": "node -e \"console.log('🧹 Run the bot to trigger automatic cleanup routine')\"",
+    "docker:build": "docker build -t fx-telegram-copier .",
+    "docker:run": "docker run -p 3000:3000 --env-file .env fx-telegram-copier"
   },
   "engines": {
     "node": ">=18.0.0",
@@ -29,8 +34,26 @@
     "forex",
     "mt4",
     "mt5",
-    "metaapi"
+    "metaapi",
+    "copier",
+    "signals",
+    "automated-trading",
+    "crypto",
+    "trading-bot"
   ],
   "author": "Humble-writer✍️",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/fx-telegram-copier.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/fx-telegram-copier/issues"
+  },
+  "homepage": "https://github.com/yourusername/fx-telegram-copier#readme",
+  "os": [
+    "linux",
+    "darwin",
+    "win32"
+  ]
 }
