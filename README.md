@@ -1,3 +1,4 @@
+
 # 🤖 FX Trading Copier
 
 A fully-featured Telegram bot that automatically copies trading signals from Telegram channels to your MT4/MT5 accounts using MetaAPI.
@@ -6,117 +7,134 @@ A fully-featured Telegram bot that automatically copies trading signals from Tel
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)
 
-## 🚨 IMPORTANT SECURITY UPDATE
-
-**Version 1.1.0 addresses critical security issues reported by the community:**
-
-- ✅ **Added `.env.example` file** to prevent token hardcoding
-- ✅ **Secure command examples** with `YOUR_PASSWORD` instead of real passwords  
-- ✅ **User limits & automatic cleanup** (1000 users max, 30-day TTL)
-- ✅ **Proper environment variable setup** with `npm run setup` command
-
 ## 📋 Table of Contents
 
+- [Features](#features)
+- [Prerequisites](#prerequisites)
 - [Quick Setup](#quick-setup)
-- [Security Features](#security-features)
 - [Installation](#installation)
 - [Deployment](#deployment)
+- [Configuration](#configuration)
 - [Usage Guide](#usage-guide)
 - [Commands Reference](#commands-reference)
+- [Settings Explained](#settings-explained)
+- [Signal Format Examples](#signal-format-examples)
+- [Supported Instruments](#supported-instruments)
 - [Troubleshooting](#troubleshooting)
+- [FAQ](#faq)
+- [Support](#support)
+
+## ✨ Features
+
+### 🎯 Core Features
+- ✅ **Multi-Order Execution** - Open 1-10 orders per signal with custom lot sizes
+- ✅ **MT4/MT5 Integration** - Connect unlimited accounts directly from Telegram
+- ✅ **Signal Channel Monitoring** - Auto-detect and copy signals from Telegram channels
+- ✅ **Smart Trade Management** - Auto close 50% at TP1, move to breakeven
+- ✅ **80+ Instruments** - Forex, Metals, Crypto, Indices, Commodities, Energy
+- ✅ **Advanced Risk Management** - Configurable lot sizes, risk limits, and multipliers
+- ✅ **Reverse Trading** - Convert BUY signals to SELL and vice versa
+- ✅ **Interactive Buttons** - Easy-to-use menu system
+- ✅ **Real-time Execution** - Instant trade copying with rate limit protection
+
+### 🛡️ Security & Performance
+- 🔒 **Secure Environment Setup** - Prevents token hardcoding with .env.example
+- 🧹 **Automatic Cleanup** - Removes inactive users after 30 days
+- 📊 **User Limits** - Maximum 1000 users with TTL tracking
+- 🔐 **SSL Security** - Configurable SSL verification for production
+- ⚡ **Memory Management** - Automatic cleanup of old data
+- 🔒 **Secure Examples** - No real passwords in command examples
+
+## 📦 Prerequisites
+
+Before you begin, ensure you have:
+
+1. **Node.js** (v18.0.0 or higher) - Download from [nodejs.org](https://nodejs.org/)
+2. **Telegram Bot Token** - Create a bot via [@BotFather](https://t.me/botfather)
+3. **MetaAPI Account** - Sign up at [metaapi.cloud](https://metaapi.cloud/)
+4. **MT4/MT5 Trading Account** - Demo or live account from any broker
 
 ## 🚀 Quick Setup
 
-### Step 1: Clone & Setup
+### Option 1: Local Development (Recommended)
 ```bash
+# Clone the repository
 git clone https://github.com/humblewriter01/FX_Telegram_Copier.git
 cd FX_Telegram_Copier
+
+# Run automated setup (creates .env file from .env.example)
 npm run setup
-```
 
-Step 2: Configure Environment
-
-Edit the created .env file:
-
-```env
-TELEGRAM_TOKEN=your_actual_bot_token_here
-META_API_KEY=your_actual_metaapi_key_here
-WEBHOOK_URL=your_render_url_here
-PORT=3000
-```
-
-Step 3: Install & Run
-
-```bash
+# Install dependencies
 npm install
+
+# Edit .env file with your actual credentials
+# Then start the bot
 npm start
 ```
 
-🔒 Security Features
+Option 2: Render Deployment
 
-Environment Variables (No Hardcoding!)
+1. Fork this repository on GitHub
+2. Connect to render.com
+3. Set environment variables in Render dashboard
+4. Deploy - Your bot will be live in minutes!
 
-The bot now uses .env.example to prevent token hardcoding:
+📥 Installation
 
-.env.example (Template - copy to .env):
+Step 1: Get the Code
+
+```bash
+git clone https://github.com/humblewriter01/FX_Telegram_Copier.git
+cd FX_Telegram_Copier
+```
+
+Step 2: Automated Environment Setup
+
+```bash
+# This copies .env.example to .env automatically
+npm run setup
+```
+
+Step 3: Configure Environment Variables
+
+Edit the newly created .env file with your actual credentials:
 
 ```env
-TELEGRAM_TOKEN=your_telegram_bot_token_here
-META_API_KEY=your_metaapi_cloud_key_here
-WEBHOOK_URL=your_render_webhook_url_here
+# Required - Get these from Telegram BotFather and MetaAPI
+TELEGRAM_TOKEN=your_actual_telegram_bot_token_here
+META_API_KEY=your_actual_metaapi_cloud_key_here
+
+# Optional - For production deployment
+WEBHOOK_URL=your_render_app_url_here
 PORT=3000
 
-# Security & Performance
+# Security & Performance Settings
 MAX_USERS=1000
 USER_TTL_DAYS=30
 CLEANUP_INTERVAL_HOURS=24
 ENABLE_SSL_STRICT=true
 ```
 
-User Management & Cleanup
-
-· Max 1000 users to prevent resource abuse
-· 30-day TTL - Inactive users automatically removed
-· 24-hour cleanup - Regular maintenance runs
-
-Secure Command Examples
-
-✅ SECURE (Version 1.1.0):
+Step 4: Install & Run
 
 ```bash
-/add_mt4 12345678 YOUR_PASSWORD Broker-Server
-/add_mt5 87654321 YOUR_PASSWORD Broker-Server
-```
-
-❌ INSECURE (Previous versions):
-
-```bash
-/add_mt4 12345678 MyP@ssw0rd ICMarkets-Demo01
-/add_mt5 87654321 MyP@ssw0rd XMGlobal-Demo
-```
-
-📥 Installation
-
-Method 1: Automated Setup (Recommended)
-
-```bash
-git clone https://github.com/humblewriter01/FX_Telegram_Copier.git
-cd FX_Telegram_Copier
-npm run setup        # Creates .env from .env.example
 npm install
 npm start
 ```
 
-Method 2: Manual Setup
+You should see:
 
-1. Clone repository
-2. Copy .env.example to .env
-3. Edit .env with your actual tokens
-4. npm install && npm start
+```
+✅ Telegram Bot Connected!
+✅ Meta API Connected!
+✅ All systems operational!
+🤖 Bot is ready to receive commands...
+```
 
 ☁️ Deployment
 
-Render.com (Recommended)
+Render Deployment (Recommended)
 
 Create render.yaml:
 
@@ -140,135 +158,213 @@ services:
         sync: false
 ```
 
+⚙️ Configuration
+
+Environment Variables (Never Hardcode Tokens!)
+
+The bot uses environment variables for security. Always use the .env file:
+
+```env
+# 🔐 SECURITY NOTE: Never commit your actual .env file to version control!
+# Use .env.example as a template and keep your real .env file private.
+
+TELEGRAM_TOKEN=your_telegram_bot_token
+META_API_KEY=your_metaapi_cloud_key
+WEBHOOK_URL=your_render_app_url
+PORT=3000
+
+# 🧹 Automatic cleanup settings
+MAX_USERS=1000
+USER_TTL_DAYS=30
+CLEANUP_INTERVAL_HOURS=24
+
+# 🔐 SSL Security
+ENABLE_SSL_STRICT=true
+```
+
+Security Features
+
+· Automatic user cleanup - Inactive users removed after 30 days
+· User limits - Maximum 1000 users to prevent resource abuse
+· SSL verification - Enabled by default for security
+· No token hardcoding - Environment variables only
+· Secure examples - No real passwords in documentation
+
 📖 Usage Guide
 
-1. Connect Trading Account
+Quick Start (5 Minutes)
 
-Use secure format:
-
-```bash
-/add_mt4 YOUR_LOGIN YOUR_PASSWORD YOUR_BROKER_SERVER
-/add_mt5 YOUR_LOGIN YOUR_PASSWORD YOUR_BROKER_SERVER
-```
-
-Examples:
-
-```bash
-/add_mt4 12345678 YOUR_PASSWORD Broker-Server
-/add_mt5 87654321 YOUR_PASSWORD Broker-Server
-```
-
-2. Add Signal Channel
-
-```bash
-/add_channel @forex_signals
-/add_channel -1001234567890
-```
-
-3. Configure Settings
-
-```bash
-/lot_size 0.10
-/num_orders 3
-/max_risk 5
-```
-
-4. Start Copying
-
-Click "▶️ Start Copying" in the menu
+1. Start the bot: npm start
+2. Open Telegram and find your bot
+3. Send /start to see main menu
+4. Connect MT4/MT5 Account:
+   ```
+   /add_mt5 YOUR_LOGIN YOUR_PASSWORD YOUR_BROKER_SERVER
+   ```
+5. Add Signal Channel:
+   ```
+   /add_channel @forex_signals
+   ```
+6. Configure Settings (optional):
+   · /lot_size 0.10
+   · /num_orders 3
+7. Start Copying - Click "▶️ Start Copying"
 
 🎮 Commands Reference
 
-Account Management
-
-Command Secure Example
-/add_mt4 ID /add_mt4 abc123def456
-/add_mt4 LOGIN PASS SERVER 
-/add_mt4 12345 YOUR_PASSWORD Broker-Server
-/add_mt5 ID /add_mt5 xyz789abc123
-/add_mt5 LOGIN PASS SERVER 
-/add_mt5 54321 YOUR_PASSWORD Broker-Server
-
-Settings
+Basic Commands
 
 Command Description
-/lot_size VALUE Set base lot size
+/start Show main menu
+/help Display help
+/status Show configuration
+
+Account Management
+
+Command Description Secure Example
+/add_mt4 ID Add existing MT4 /add_mt4 abc123def456
+/add_mt4 LOGIN PASS SERVER Create new MT4 /add_mt4 12345 YOUR_PASSWORD Broker-Server
+/add_mt5 ID Add existing MT5 /add_mt5 xyz789abc123
+/add_mt5 LOGIN PASS SERVER Create new MT5 /add_mt5 54321 YOUR_PASSWORD Broker-Server
+
+Channel Management
+
+Command Description
+/add_channel @username Add channel by username
+/add_channel ID Add channel by ID
+/list_channels Show all channels
+
+Volume Settings
+
+Command Description
+/lot_size VALUE Set base lot per order
 /num_orders VALUE Set number of orders
+/lot_multiplier VALUE Multiply all lots
+
+Risk Settings
+
+Command Description
 /max_risk VALUE Set maximum risk %
+
+🎛️ Settings Explained
+
+Volume Control
+
+Base Lot Size
+
+· Lot size for each individual order
+· Example: 0.01, 0.10, 1.00
+· Set with: /lot_size 0.10
+
+Number of Orders
+
+· How many orders to open per signal (1-10)
+· Example: 1 order, 3 orders, 10 orders
+· Set with: /num_orders 3
+
+Volume Calculation
+
+```
+Total Volume = Base Lot × Number of Orders × Multiplier
+Example: 0.10 × 3 orders × 2 = 0.60 lots total
+```
+
+Trade Management
+
+Auto Close at TP1
+
+· When enabled, closes 50% of each position at TP1
+· Remaining 50% continues to TP2/TP3
+
+Move to Breakeven
+
+· Automatically moves stop loss to entry price
+· Triggers at 50% of distance to TP1
+
+📊 Signal Format Examples
+
+Supported Formats
+
+```
+BUY EURUSD @ 1.0950 SL 1.0920 TP1 1.0980 TP2 1.1000 TP3 1.1020
+SELL GOLD Entry: 2050.50 Stop: 2055 TP1: 2040 TP2: 2030
+BUY GOLD NOW  # Immediate execution
+TP1 HIT       # Close 50% and move to breakeven
+```
+
+🌍 Supported Instruments
+
+💱 Forex Pairs
+
+· EURUSD, GBPUSD, USDJPY, USDCHF, AUDUSD, USDCAD, NZDUSD
+
+🥇 Metals
+
+· GOLD/XAUUSD, SILVER/XAGUSD
+
+⚫ Energy & Oil
+
+· OIL/USOIL, UKOIL/BRENT
+
+₿ Cryptocurrencies
+
+· BTCUSD, ETHUSD, XRPUSD, LTCUSD
+
+📊 Indices
+
+· US30, US500, NAS100, UK100, GER30
+
+Total: 80+ Instruments Supported
 
 🔧 Troubleshooting
 
 Common Issues
 
-Bot not starting:
+Bot Not Starting
 
-· Check .env file exists and has correct tokens
-· Verify tokens are valid
+Problem: "ETELEGRAM: 401 Unauthorized"
 
-Account connection failed:
+```
+Solution: Check TELEGRAM_TOKEN in .env file
+```
 
-· Use correct server name from your broker
-· Check login credentials
+Problem: "Meta API Connection Failed"
 
-Signals not detected:
+```
+Solution: Verify META_API_KEY in .env file
+```
 
-· Ensure bot is member of signal channel
-· Check channel allows bots
+Account Connection Issues
 
-🛡️ Security Best Practices
+Problem: "Unable to verify account"
 
-1. Use Environment Variables
+```
+Solution: Check credentials and server name
+```
 
-Never hardcode tokens in bot.js! Always use .env file.
+❓ FAQ
 
-2. Secure Passwords
+General Questions
 
-· Use YOUR_PASSWORD placeholder in examples
-· Never share actual passwords in chats
-· Use unique passwords for trading accounts
+Q: Is this bot free?
+A:The bot code is free. You need free Telegram bot, MetaAPI (free tier available), and MT4/MT5 account.
 
-3. Regular Updates
+Q: What are the new security features?
+A:Version 1.1.0 includes:
 
-· Keep bot updated to latest version
-· Monitor MetaAPI usage and costs
-· Review security settings regularly
+· Automatic user cleanup (30-day TTL)
+· Maximum user limits (1000 users)
+· Secure environment variable setup
+· No password examples in commands
+· Configurable SSL verification
 
-## 📞 Support
+Security Questions
 
-### 🐛 Bug Reports & Feature Requests
-Please use [GitHub Issues](https://github.com/humblewriter01/FX_Telegram_Copier/issues) for:
-- Bug reports
-- Feature requests
-- Documentation issues
+Q: Why should I use environment variables?
+A:Environment variables prevent token hardcoding, keep credentials secure, and allow easy deployment across different environments.
 
-### ❓ Community Help
-- **Check the [Troubleshooting](#troubleshooting) section first**
-- **Read the [FAQ](#faq) for common solutions**
-- **Search existing issues before creating new ones**
-
-### 📋 Before Asking for Help
-1. What error are you seeing? (include full logs)
-2. What steps reproduce the issue?
-3. What have you tried already?
-4. What's your environment? (Node version, OS, etc.)
-
-### 🚨 Emergency Issues
-For critical security issues, please email: **security@yourdomain.com**
-
-Reporting Issues
-
-Include:
-
-· Error message
-· /status command output
-· Steps to reproduce
-· Bot version (1.1.0)
-
-Getting Help
-
-1. Check this README first
-2. Use /status command for diagnostics
-3. Check MetaAPI documentation
+Q: What happens if I exceed user limits?
+A:The bot will stop accepting new users and automatically clean up inactive users every 24 hours.
 
 📄 License
 
@@ -276,10 +372,37 @@ MIT License - Feel free to modify and distribute.
 
 ⚠️ Disclaimer
 
-Trading involves risk. Always test on demo accounts first. The developers are not responsible for any trading losses.
+Trading Risk Warning:
+Trading carries a high level of risk and may not be suitable for all investors.
+
+Software Disclaimer:
+This bot is provided"as is" without warranty of any kind. Use at your own risk.
+
+🎉 What's New in Version 1.1.0
+
+Security Improvements
+
+· ✅ .env.example file - Prevents token hardcoding
+· ✅ Automated setup script - npm run setup creates .env file
+· ✅ User limits & cleanup - 1000 user max, 30-day TTL
+· ✅ Secure command examples - No real passwords in documentation
+· ✅ SSL security - Configurable verification
+
+Setup Improvements
+
+· ✅ Clear documentation - Environment variable usage
+· ✅ Better security practices - No hardcoded tokens
+· ✅ Automatic maintenance - Cleanup of inactive users
+
+🚀 Conclusion
+
+You now have a secure trading copier bot with proper environment variable setup, user limits, and automatic cleanup features.
+
+Happy Trading! 🚀
 
 ---
+
 Last Updated: November 2025
-Version 1.1.0 - Security Update: Environment variables, user limits, secure examples
+Version: 1.1.0
 Author: Humble-writer✍️
 
