@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: fx-telegram-copier-
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node bot.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TELEGRAM_TOKEN
+        sync: false
+      - key: META_API_KEY
+        sync: false
+      - key: WEBHOOK_URL
+        sync: false
