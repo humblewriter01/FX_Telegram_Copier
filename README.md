@@ -1,4 +1,4 @@
-# 🤖 Telegram Trading Copier Bot
+# 🤖 FX Trading Copier
 
 A fully-featured Telegram bot that automatically copies trading signals from Telegram channels to your MT4/MT5 accounts using MetaAPI.
 
@@ -76,8 +76,8 @@ Before you begin, ensure you have:
 
 ```bash
 # Create project directory
-mkdir telegram-copier-bot
-cd telegram-copier-bot
+mkdir fx-telegram-copier
+cd fx-telegram-copier
 
 # Copy the bot.js file to this directory
 ```
@@ -721,7 +721,7 @@ MIT License - Feel free to modify and distribute.
 Trading foreign exchange, cryptocurrencies, and contracts for differences (CFDs) on margin carries a high level of risk and may not be suitable for all investors. The high degree of leverage can work against you as well as for you. Before deciding to trade, you should carefully consider your investment objectives, level of experience, and risk appetite.
 
 **Software Disclaimer:**
-This bot is provided "as is" without warranty of any kind. Use at your own risk. The developers are not responsible for any trading losses incurred while using this software. Always test thoroughly on demo accounts before using with real money.
+This bot is provided "as is" without warranty of any kind. Use at your own risk. The developer is not responsible for any trading losses incurred while using this software. Always test thoroughly on demo accounts before using with real money.
 
 ---
 
