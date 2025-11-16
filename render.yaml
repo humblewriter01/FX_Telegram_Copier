@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: fx-telegram-copier-
+    name: fx-telegram-copier
     env: node
     plan: free
     buildCommand: npm install
