@@ -1,0 +1,36 @@
+{
+  "name": "fx-telegram-copier",
+  "version": "1.0.0",
+  "description": "Telegram bot for copying trading signals to MT4/MT5 accounts",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js",
+    "dev": "nodemon bot.js",
+    "test": "echo \"No tests configured for trading bot\" && exit 0",
+    "build": "echo \"No build step required\"",
+    "validate": "node -c bot.js && echo '✅ Bot.js syntax is valid'"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "dependencies": {
+    "node-telegram-bot-api": "^0.64.0",
+    "axios": "^1.6.0",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "trading",
+    "forex",
+    "mt4",
+    "mt5",
+    "metaapi"
+  ],
+  "author": "Humble-writer✍️",
+  "license": "MIT"
+}
