@@ -383,16 +383,22 @@ This bot is provided"as is" without warranty of any kind. Use at your own risk.
 Security Improvements
 
 · ✅ .env.example file - Prevents token hardcoding
-· ✅ Automated setup script - npm run setup creates .env file
-· ✅ User limits & cleanup - 1000 user max, 30-day TTL
-· ✅ Secure command examples - No real passwords in documentation
-· ✅ SSL security - Configurable verification
+· 
+✅ Automated setup script - npm run setup creates .env file
+· 
+✅ User limits & cleanup - 1000 user max, 30-day TTL
+· 
+✅ Secure command examples - No real passwords in documentation
+· 
+✅ SSL security - Configurable verification
 
 Setup Improvements
 
 · ✅ Clear documentation - Environment variable usage
-· ✅ Better security practices - No hardcoded tokens
-· ✅ Automatic maintenance - Cleanup of inactive users
+· 
+✅ Better security practices - No hardcoded tokens
+· 
+✅ Automatic maintenance - Cleanup of inactive users
 
 🚀 Conclusion
 
