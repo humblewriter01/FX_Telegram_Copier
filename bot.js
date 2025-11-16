@@ -1,14 +1,20 @@
 const TelegramBot = require('node-telegram-bot-api');
 const axios = require('axios');
 const express = require('express');
-const https = require('https'); // ADDED: Required for SSL fix
+const https = require('https');
 
-// Configuration
+// Configuration with environment variables
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || 'Add your Telegram Bot Token here';
 const META_API_KEY = process.env.META_API_KEY || 'Add your metaapi Key here';
 const META_API_URL = 'https://mt-client-api-v1.metaapi.cloud';
 const PORT = process.env.PORT || 3000;
-const WEBHOOK_URL = process.env.WEBHOOK_URL; // Set this in Render env vars
+const WEBHOOK_URL = process.env.WEBHOOK_URL;
+
+// Security and cleanup settings
+const MAX_USERS = parseInt(process.env.MAX_USERS) || 1000;
+const USER_TTL_DAYS = parseInt(process.env.USER_TTL_DAYS) || 30;
+const CLEANUP_INTERVAL_HOURS = parseInt(process.env.CLEANUP_INTERVAL_HOURS) || 24;
+const ENABLE_SSL_STRICT = process.env.ENABLE_SSL_STRICT !== 'false';
 
 // Initialize Express app FIRST
 const app = express();
@@ -28,10 +34,13 @@ if (WEBHOOK_URL) {
   console.log('🔗 Bot running in POLLING mode');
 }
 
-// User data storage
+// User data storage with TTL tracking
 const userData = new Map();
 const channelMonitors = new Map();
 const pendingSignalUpdates = new Map();
+
+// Track user activity for cleanup
+const userActivity = new Map();
 
 // Health check endpoints
 app.get('/', (req, res) => {
@@ -51,6 +60,23 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Stats endpoint
+app.get('/stats', (req, res) => {
+  const activeUsers = Array.from(userActivity.entries())
+    .filter(([_, timestamp]) => (new Date() - timestamp) < 24 * 60 * 60 * 1000)
+    .length;
+    
+  res.json({
+    users: userData.size,
+    activeUsers: activeUsers,
+    channelMonitors: channelMonitors.size,
+    pendingSignals: pendingSignalUpdates.size,
+    maxUsers: MAX_USERS,
+    userTTLDays: USER_TTL_DAYS,
+    serverUptime: process.uptime()
+  });
+});
+
 // Webhook endpoint for Telegram
 if (WEBHOOK_URL) {
   app.post(`/bot${TELEGRAM_TOKEN}`, (req, res) => {
@@ -64,21 +90,27 @@ app.get('/ping', (req, res) => {
   res.send('pong');
 });
 
-// Meta API helper function - FIXED SSL ISSUE
+// Meta API helper function - SECURE SSL HANDLING
 async function metaApiRequest(endpoint, method = 'GET', data = null) {
   try {
-    // Create axios instance with SSL fix
-    const axiosInstance = axios.create({
+    const config = {
       baseURL: META_API_URL,
       timeout: 30000,
-      httpsAgent: new https.Agent({
-        rejectUnauthorized: false // FIX: Allows expired certificates
-      }),
       headers: {
         'auth-token': META_API_KEY,
         'Content-Type': 'application/json'
       }
-    });
+    };
+    
+    // Only disable SSL verification if explicitly set to false
+    if (!ENABLE_SSL_STRICT) {
+      config.httpsAgent = new https.Agent({
+        rejectUnauthorized: false
+      });
+      console.warn('⚠️  SSL strict verification is disabled - not recommended for production');
+    }
+    
+    const axiosInstance = axios.create(config);
     
     const response = await axiosInstance({
       method,
@@ -97,30 +129,85 @@ async function metaApiRequest(endpoint, method = 'GET', data = null) {
   }
 }
 
-// Get user data
+// Enhanced getUserData with TTL tracking and size limits
 function getUserData(userId) {
+  // Check if we've reached maximum users
+  if (userData.size >= MAX_USERS && !userData.has(userId)) {
+    throw new Error(`Maximum user limit reached (${MAX_USERS}). Please try again later.`);
+  }
+  
   if (!userData.has(userId)) {
     userData.set(userId, {
       mt4Accounts: [],
       mt5Accounts: [],
       signalChannels: [],
       copySettings: {
-        lotMultiplier: 1,
-        copyStopLoss: true,
-        copyTakeProfit: true,
-        maxRisk: 5,
-        reverseSignals: false,
-        autoCloseAtTP1: true,
-        moveToBreakeven: true,
-        breakEvenTrigger: 50,
-        numberOfOrders: 1,
-        baseLotSize: 0.01
+        lotMultiplier: parseFloat(process.env.DEFAULT_LOT_MULTIPLIER) || 1,
+        copyStopLoss: process.env.DEFAULT_COPY_SL !== 'false',
+        copyTakeProfit: process.env.DEFAULT_COPY_TP !== 'false',
+        maxRisk: parseFloat(process.env.DEFAULT_MAX_RISK) || 5,
+        reverseSignals: process.env.DEFAULT_REVERSE_SIGNALS === 'true',
+        autoCloseAtTP1: process.env.DEFAULT_AUTO_CLOSE_TP1 !== 'false',
+        moveToBreakeven: process.env.DEFAULT_MOVE_BREAKEVEN !== 'false',
+        breakEvenTrigger: parseFloat(process.env.DEFAULT_BREAKEVEN_TRIGGER) || 50,
+        numberOfOrders: parseInt(process.env.DEFAULT_ORDERS_COUNT) || 1,
+        baseLotSize: parseFloat(process.env.DEFAULT_LOT_SIZE) || 0.01
       },
       isActive: false,
-      lastProcessedMessages: new Set()
+      lastProcessedMessages: new Set(),
+      createdAt: new Date()
     });
   }
+  
+  // Update user activity timestamp
+  userActivity.set(userId, new Date());
+  
   return userData.get(userId);
+}
+
+// Periodic cleanup function
+function startCleanupRoutine() {
+  setInterval(() => {
+    console.log('🧹 Starting user data cleanup...');
+    const now = new Date();
+    const ttlMs = USER_TTL_DAYS * 24 * 60 * 60 * 1000;
+    let cleanedCount = 0;
+    
+    // Clean inactive users
+    for (const [userId, lastActivity] of userActivity.entries()) {
+      if (now - lastActivity > ttlMs) {
+        userData.delete(userId);
+        userActivity.delete(userId);
+        
+        // Clean related data
+        for (const [key] of channelMonitors.entries()) {
+          if (key.startsWith(`${userId}_`)) {
+            channelMonitors.delete(key);
+          }
+        }
+        
+        for (const [key] of pendingSignalUpdates.entries()) {
+          if (key.startsWith(`${userId}_`)) {
+            pendingSignalUpdates.delete(key);
+          }
+        }
+        
+        cleanedCount++;
+      }
+    }
+    
+    // Clean old pending signals (older than 7 days)
+    const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+    for (const [key, signal] of pendingSignalUpdates.entries()) {
+      if (signal.timestamp < weekAgo) {
+        pendingSignalUpdates.delete(key);
+      }
+    }
+    
+    console.log(`🧹 Cleanup completed: ${cleanedCount} inactive users removed`);
+    console.log(`📊 Current stats: ${userData.size} active users, ${channelMonitors.size} channel monitors`);
+    
+  }, CLEANUP_INTERVAL_HOURS * 60 * 60 * 1000);
 }
 
 // Keyboard functions
@@ -293,13 +380,18 @@ bot.on('callback_query', async (query) => {
 \`/add_mt4 abc123def456789\`
 
 🆕 *Create new:*
-\`/add_mt4 12345678 MyP@ssw0rd Broker-Demo01\`
+\`/add_mt4 12345678 YOUR_PASSWORD Broker-Server\`
 
 💡 *Tips:*
 • Get your server name from your broker
 • Common servers: ICMarkets-Demo, XMGlobal-Demo, Exness-Demo
 • Account will be created and deployed automatically
 • You can add multiple accounts
+
+🔒 *Security Note:*
+• Never share your actual password in chats
+• Use a unique password for trading accounts
+• Consider using MetaAPI account IDs for better security
       `, { parse_mode: 'Markdown' });
   }
   else if (data === 'connect_mt5') {
@@ -318,13 +410,18 @@ bot.on('callback_query', async (query) => {
 \`/add_mt5 abc123def456789\`
 
 🆕 *Create new:*
-\`/add_mt5 87654321 MyP@ssw0rd Broker-Demo02\`
+\`/add_mt5 87654321 YOUR_PASSWORD Broker-Server\`
 
 💡 *Tips:*
 • Get your server name from your broker
 • Common servers: ICMarkets-Demo, XMGlobal-Demo, Exness-Demo
 • Account will be created and deployed automatically
 • You can add multiple accounts
+
+🔒 *Security Note:*
+• Never share your actual password in chats
+• Use a unique password for trading accounts
+• Consider using MetaAPI account IDs for better security
       `, { parse_mode: 'Markdown' });
   }
   else if (data === 'add_channel') {
@@ -509,7 +606,7 @@ bot.onText(/\/add_mt4 (.+)/, async (msg, match) => {
       bot.sendMessage(chatId, `✅ MT4 Account created and deployed!\n\nID: ${accountId}\nLogin: ${login}\nServer: ${server}\nStatus: ${accountStatus.state}\n\n⚠️ Note: It may take a few moments for the account to fully connect.`);
       
     } else {
-      bot.sendMessage(chatId, '❌ Invalid format.\n\n*Option 1: Add existing account*\n\`/add_mt4 ACCOUNT_ID\`\n\n*Option 2: Create new account*\n\`/add_mt4 LOGIN PASSWORD SERVER\`\n\nExample:\n\`/add_mt4 abc123def456\`\nor\n\`/add_mt4 12345678 MyP@ssw0rd ICMarkets-Demo01\`', { parse_mode: 'Markdown' });
+      bot.sendMessage(chatId, '❌ Invalid format.\n\n*Option 1: Add existing account*\n\`/add_mt4 ACCOUNT_ID\`\n\n*Option 2: Create new account*\n\`/add_mt4 LOGIN PASSWORD SERVER\`\n\nExample:\n\`/add_mt4 abc123def456\`\nor\n\`/add_mt4 12345678 YOUR_PASSWORD Broker-Server\`', { parse_mode: 'Markdown' });
       return;
     }
     
@@ -534,7 +631,7 @@ bot.onText(/\/add_mt4 (.+)/, async (msg, match) => {
   }
 });
 
-// Add MT5 account with enhanced error handling - SSL ISSUE FIXED
+// Add MT5 account with enhanced error handling - SECURE SSL HANDLING
 bot.onText(/\/add_mt5 (.+)/, async (msg, match) => {
   const chatId = msg.chat.id;
   const userId = msg.from.id;
@@ -592,7 +689,7 @@ bot.onText(/\/add_mt5 (.+)/, async (msg, match) => {
       bot.sendMessage(chatId, `✅ MT5 Account created and deployed!\n\nID: ${accountId}\nLogin: ${login}\nServer: ${server}\nStatus: ${accountStatus.state}\n\n⚠️ Note: It may take a few moments for the account to fully connect.`);
       
     } else {
-      bot.sendMessage(chatId, '❌ Invalid format.\n\n*Option 1: Add existing account*\n\`/add_mt5 ACCOUNT_ID\`\n\n*Option 2: Create new account*\n\`/add_mt5 LOGIN PASSWORD SERVER\`\n\nExample:\n\`/add_mt5 abc123def456\`\nor\n\`/add_mt5 87654321 MyP@ssw0rd XMGlobal-Demo\`', { parse_mode: 'Markdown' });
+      bot.sendMessage(chatId, '❌ Invalid format.\n\n*Option 1: Add existing account*\n\`/add_mt5 ACCOUNT_ID\`\n\n*Option 2: Create new account*\n\`/add_mt5 LOGIN PASSWORD SERVER\`\n\nExample:\n\`/add_mt5 abc123def456\`\nor\n\`/add_mt5 87654321 YOUR_PASSWORD Broker-Server\`', { parse_mode: 'Markdown' });
       return;
     }
     
@@ -1005,7 +1102,7 @@ async function handleTPUpdate(userId, chatId, channelId, signal) {
             'POST'
           );
           bot.sendMessage(chatId, `🔴 Closed position!\n💱 ${signal.symbol}\n📊 Account: ${account.login}`);
-          updateCount++;
+            updateCount++;
         }
       }
     } catch (error) {
@@ -1464,6 +1561,10 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`📱 Bot is ready!`);
 });
 
+// Start cleanup routine
+startCleanupRoutine();
+console.log(`✅ Cleanup routine started (every ${CLEANUP_INTERVAL_HOURS} hours)`);
+
 // Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('SIGTERM received, shutting down gracefully...');
@@ -1494,3 +1595,4 @@ testConnections().then(success => {
 
 console.log('✅ Advanced Trading Copier Bot is running...');
 console.log('📊 Features: MT4/MT5 connection + Signal channel monitoring + Immediate execution');
+console.log('🔒 Security: User limits + Automatic cleanup + Secure SSL handling');
