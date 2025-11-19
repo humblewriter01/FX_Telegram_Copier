@@ -1,4 +1,3 @@
-
 # 🤖 FX Trading Copier
 
 A fully-featured Telegram bot that automatically copies trading signals from Telegram channels to your MT4/MT5 accounts using MetaAPI.
@@ -234,9 +233,9 @@ Command Description
 /add_channel ID Add channel by ID
 /list_channels Show all channels
 
-Volume Settings
+**Volume Settings**
 
-Command Description
+**Command Description**
 /lot_size VALUE Set base lot per order
 /num_orders VALUE Set number of orders
 /lot_multiplier VALUE Multiply all lots
@@ -246,7 +245,7 @@ Risk Settings
 Command Description
 /max_risk VALUE Set maximum risk %
 
-🎛️ Settings Explained
+🎛️ **Settings Explained**
 
 Volume Control
 
@@ -292,9 +291,9 @@ BUY GOLD NOW  # Immediate execution
 TP1 HIT       # Close 50% and move to breakeven
 ```
 
-🌍 Supported Instruments
+🌍 **Supported Instruments**
 
-💱 Forex Pairs
+💱 **Forex Pairs**
 
 · EURUSD, GBPUSD, USDJPY, USDCHF, AUDUSD, USDCAD, NZDUSD
 
@@ -316,7 +315,7 @@ TP1 HIT       # Close 50% and move to breakeven
 
 Total: 80+ Instruments Supported
 
-🔧 Troubleshooting
+🔧 **Troubleshooting**
 
 Common Issues
 
@@ -342,7 +341,7 @@ Problem: "Unable to verify account"
 Solution: Check credentials and server name
 ```
 
-❓ FAQ
+❓ **FAQ**
 
 General Questions
 
@@ -380,7 +379,7 @@ This bot is provided"as is" without warranty of any kind. Use at your own risk.
 
 🎉 What's New in Version 1.1.0
 
-Security Improvements
+**Security Improvements**
 
 ✅ .env.example file - Prevents token hardcoding
 
@@ -400,7 +399,7 @@ Setup Improvements
  
 ✅ Automatic maintenance - Cleanup of inactive users
 
-🚀 Conclusion
+🚀 **Conclusion**
 
 You now have a secure trading copier bot with proper environment variable setup, user limits, and automatic cleanup features.
 
@@ -408,7 +407,12 @@ Happy Trading! 🚀
 
 ---
 
-Last Updated: November 2025
-Version: 1.1.0
-Author: Humble-writer✍️
+*Last Updated: November 2025*
+
+*Version: 1.1.0*
+
+*Author: Humble-writer✍️*
+
+
+_**©All rights reserved 2025**_
 
