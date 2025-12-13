@@ -6,7 +6,7 @@ const https = require('https');
 // Configuration with environment variables
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || 'Add your Telegram Bot Token here';
 const META_API_KEY = process.env.META_API_KEY || 'Add your metaapi Key here';
-const META_API_URL = 'https://app.metaapi.cloud';
+const META_API_URL = 'https://mt-provisioning-api-v1.agiliumtrade.ai';
 const PORT = process.env.PORT || 3000;
 const WEBHOOK_URL = process.env.WEBHOOK_URL;
 
